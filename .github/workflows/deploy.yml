@@ -1,0 +1,45 @@
+name: Deploy to ECS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: List files in build context
+      run: ls -la
+
+    - name: Check Docker version
+      run: docker --version
+
+    - name: Check Docker daemon status
+      run: docker info
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Log in to Amazon ECR
+      run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 339713051933.dkr.ecr.us-east-1.amazonaws.com
+
+    - name: Build Docker image
+      run: docker build -t medusa-backend -f Dockerfile .
+
+    - name: Tag Docker image
+      run: docker tag medusa-backend:latest 339713051933.dkr.ecr.us-east-1.amazonaws.com/medusa-backend:latest
+
+    - name: Push Docker image to Amazon ECR
+      run: docker push 339713051933.dkr.ecr.us-east-1.amazonaws.com/medusa-backend:latest
+
+    - name: Deploy to ECS
+      run: aws ecs update-service --cluster medusa-cluster --service medusa-service --force-new-deployment
