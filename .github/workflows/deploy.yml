@@ -13,14 +13,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: List files
+    - name: List files in build context
       run: ls -la
 
     - name: Check Docker version
       run: docker --version
 
-    - name: Check Buildx installation
-      run: docker buildx version
+    - name: Check Docker daemon status
+      run: docker info
 
     - name: Set up AWS CLI
       uses: aws-actions/configure-aws-credentials@v2
@@ -33,7 +33,7 @@ jobs:
       run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 339713051933.dkr.ecr.us-east-1.amazonaws.com
 
     - name: Build Docker image
-      run: docker build -t medusa-backend .
+      run: docker build -t medusa-backend -f Dockerfile .
 
     - name: Tag Docker image
       run: docker tag medusa-backend:latest 339713051933.dkr.ecr.us-east-1.amazonaws.com/medusa-backend:latest
