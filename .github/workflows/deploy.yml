@@ -24,7 +24,7 @@ jobs:
       run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 339713051933.dkr.ecr.us-east-1.amazonaws.com
 
     - name: Build Docker image
-      run: docker build -t medusa-backend .
+      run: docker build -t medusa-backend.
 
     - name: Tag Docker image
       run: docker tag medusa-backend:latest 339713051933.dkr.ecr.us-east-1.amazonaws.com/medusa-backend:latest
